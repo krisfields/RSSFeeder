@@ -48,7 +48,6 @@
             self.image = [UIImage imageWithData: [NSData dataWithContentsOfURL:urlOfImage]];
             dispatch_async(dispatch_get_main_queue(), ^{
                 block();
-//                [self.rssVC.articlesTable setNeedsLayout];
                 [self.rssVC.articlesTable reloadData];
             });
         });

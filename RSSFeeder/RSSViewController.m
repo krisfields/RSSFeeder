@@ -10,6 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "Article.h"
 #import "ArticleViewController.h"
+#import "CellSubClass.h"
 
 @interface RSSViewController () <UITableViewDataSource, UITableViewDelegate, RKRequestDelegate>
 @property (strong, nonatomic) NSMutableArray *articles;
@@ -38,6 +39,11 @@
     // Release any retained subviews of the main view.
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
 
 -(void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
     id xmlParser = [[RKParserRegistry sharedRegistry] parserForMIMEType:RKMIMETypeXML];
@@ -58,10 +64,6 @@
 
 
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
-}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -81,16 +83,23 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+    
+    CellSubClass *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (!cell){
+        cell = [[CellSubClass alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+    }
     // Configure the cell...
     Article *article = [self.articles objectAtIndex:[indexPath row]];
+    if (cell.article == article){
+        return cell;
+    }
+    cell.imageView.image = nil;
     cell.textLabel.text = [article title];
+    cell.article = article;
     
     article.rssVC = self;
     [article getThumbnailImageFromArticle:^(void){
-        cell.imageView.image = article.image;
-        
+            cell.imageView.image = cell.article.image;
     }];
     
     return cell;
